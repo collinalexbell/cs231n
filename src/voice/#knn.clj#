@@ -60,7 +60,7 @@
         (doall
          (map-indexed
           (fn [r-index rgb]
-            (q/set-pixel  c-index r-index (apply q/color (map rgb))))
+            (q/set-pixel  c-index r-index (apply q/color rgb)))
           column)))
       (transpose img))))
   (q/defsketch img
