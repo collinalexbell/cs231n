@@ -1,8 +1,6 @@
-(ns voice.knn
+(ns cs231n.img-utils
   (:require [quil.core :as q])
   (:use clojure.core.matrix))
-
-(set-current-implementation :vectorz)
 
 (defn slurp-bytes
   "Slurp the bytes from a slurpable thing"
@@ -12,7 +10,6 @@
     (.toByteArray out)))
 
 ;(def cfar-train-bin (slurp-bytes "resources/train.bin"))
-(def cifar-dir "resources/cifar-10-batches-bin")
 
 (defn split-cifar-pixel-data [data]
   (reshape (array (map #(bit-and % 0xFF) data)) [3 32 32]))
@@ -46,28 +43,37 @@
    :test
    (load-cifar-batch (str dir "/test_batch.bin"))})
 
-(def cifar (load-all-cifar cifar-dir))
-
-
-
-
-(defn draw-img [img]
+(defn draw-imgs [imgs imgs-per-row]
   (defn draw-img-setup [])
   (defn draw-img-draw []
     (doall
      (map-indexed
-      (fn [c-index column]
+      (fn [img-index img]
         (doall
          (map-indexed
-          (fn [r-index rgb]
-            (q/set-pixel  c-index r-index (apply q/color (map rgb))))
-          column)))
-      (transpose img))))
+          (fn [c-index column]
+            (doall
+             (map-indexed
+              (fn [r-index rgb]
+                (q/set-pixel
+                 (+ c-index (* 32 (mod img-index imgs-per-row)))
+                 (+ r-index (* 32 (int (Math/floor (/ img-index imgs-per-row)))))
+                 (apply q/color rgb)))
+              column)))
+          (transpose img))))
+      imgs)))
   (q/defsketch img
     :title "A display img"
     :setup draw-img-setup
     :draw draw-img-draw
-    :size [32 32]))
+    :size [(* 32 imgs-per-row) (* 32 (+ 1 (int (Math/floor (/ (count imgs) imgs-per-row)))))]))
+
+
+
+
+
+
+
 
 
 
